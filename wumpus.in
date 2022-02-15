@@ -1,0 +1,98 @@
+set(arithmetic).
+assign(domain_size, 4). %search only the given size (up down right left)
+assign(max_models, -1). %stop searching when n-th model has been found(there is no limit %though because we put -1)
+
+formulas(assumptions).
+
+ds = domain_size + -1. %domain size 3
+x < ds -> increment(x) = x + 1. %increment x/y of a cell
+increment(ds) = decrement(ds).
+x > 0 -> decrement(x) = x + -1. %decrement x/y of a cell
+decrement(0) = increment(0).
+
+% Wumpus and gold exists
+exists x exists y (wumpus(x,y)).
+exists x exists y (gold(x,y)).
+
+% Cell is safe if there is no pit or wumpus in it
+all x all y (safe(x,y) <-> -wumpus(x,y) & -pit(x,y)).
+
+%if there is a pit in a cell we have breeze in that cell and in it's neighbours
+all x all y (pit(x,y) -> breeze(increment(x), y)).
+all x all y (pit(x,y) -> breeze(decrement(x), y)).
+all x all y (pit(x,y) -> breeze(x, increment(y))).
+all x all y (pit(x,y) -> breeze(x, decrement(y))).
+
+%If agent is in a breeze cell there is an pit in one of it's neighbours
+all x all y (breeze(x,y) -> pit(increment(x), y) | pit(decrement(x), y) | pit(x, increment(y)) | pit(x, decrement(y))).
+
+%If there's a stench in a cell there's no pit
+all x all y (stench(x,y) -> -pit(x, y) ).
+
+% If wumpus is in a cell, there is stench in that cell and in it's neighbours however there's no stench in the wumpus cell
+all x all y (wumpus(x,y) -> -stench(x, y)).
+all x all y (wumpus(x,y) -> stench(increment(x), y)).
+all x all y (wumpus(x,y) -> stench(decrement(x), y)).
+all x all y (wumpus(x,y) -> stench(x, increment(y))).
+all x all y (wumpus(x,y) -> stench(x, decrement(y))).
+
+%If agent is in a stench cell there is an wumpus in one of it's neighbours
+all x all y (stench(x,y) -> wumpus(x, y) | wumpus(increment(x), y) | wumpus(decrement(x), y) | wumpus(x,increment(y)) | wumpus(x, decrement(y))).
+
+%Wumpus isn't in the same cell with a pit or the gold
+all x all y (wumpus(x,y) -> -pit(x,y)).
+all x all y (wumpus(x,y) -> -gold(x,y)).
+
+%Gold isn't in the same cell with a pit or the Wumpus
+all x all y (gold(x,y) -> -pit(x,y)).
+all x all y (pit(x,y) -> -gold(x,y)).
+
+% wumpus is unique
+all x all y (wumpus(x,y) -> -(exists z exists w (wumpus(z,w) & z != x & w != y))). %diagonally
+all x all y (wumpus(x,y) -> -(exists z (wumpus(z,y) & z != x))). %collumn
+all x all y (wumpus(x,y) -> -(exists z (wumpus(x,z) & z != y))). %row
+
+% Gold is unique
+all x all y (gold(x,y) -> -(exists z exists w (gold(z,w) & z != x & w != y))). %diagonally
+all x all y (gold(x,y) -> -(exists z (gold(z,y) & z != x))). %row
+all x all y (gold(x,y) -> -(exists z (gold(x,z) & z != y))). %collumn
+
+
+%agent knows there is only 1 pit on the same row and collumn
+all x all y (pit(x,y) -> -(exists z (pit(z,y) & z != x))).
+all x all y (pit(x,y) -> -(exists z (pit(x,z) & z != y))).
+
+%agent starts in cell(3,0)
+safe(3,0).
+
+%he feels stench in (2,0) and breeze in (3,1) 
+stench(2,0).
+breeze(3,1).
+
+%he takes a step towards (3,1) and he knows it's safe in (2,3) and (2,1)
+safe(2,3).
+safe(2,1).
+
+
+%he steps in (2,1)
+%discovers breeze in cell (2,2) and stench in (1,1).
+breeze(2,2).
+stench(1,1).
+%he goes in (2,2) knowing that there's only 1 pit per collumn and that it is behind him
+%because of the breeze) and discovers breeze in (0,2) and (1,3).
+breeze(0,2).
+breeze(1,3).
+%he steps in (0,2) and he knows it's safe in (0,1)
+safe(0,1).
+
+%he steps in (0,1)
+%he knows gold is not in a breeze cell
+all x all y (breeze(x,y) -> -gold(x,y)).
+
+%he knows gold is on the main diagonal but not in (0,0)
+gold(x,y) -> x = y.
+-gold(0,0).
+
+end_of_list.
+ 
+

@@ -1,0 +1,21 @@
+
+
+formulas(assumptions).
+
+knight(x) | knave(x) | normal(x). %x is either knight, knave or normal
+
+knight(x) -> (-knave(x) & -normal(x)). %if x is knight he can't be knave or normal
+knave(x) -> (-knight(x) & -normal(x)). %if x in knave he can't be knight or normal
+Normal(x) -> (-knight(x) & -knave(x)). %if x is normal he can't be knight or knave
+
+(exists x knight(x)).
+(exists x knave(x)).  %Knight, Knave and Normal exists
+(exists x normal(x)).
+
+A != B & A != C & B != C. %person A can't be person B or C
+
+knave(A) | normal(A). %A can either be normal or a liar
+(knight(B) & normal(A)) | (knave(B) & -normal(A)) | normal(B). %B can be normal, be a knight(meaning that A is a normal) or a knave(meaning that A is not normal)
+knight(C) | normal(C). %(C can either be a knight or a normal)
+
+end_of_list.

@@ -1,0 +1,263 @@
+\documentclass[a4paper,12pt]{report}
+\usepackage{algorithmic}
+\usepackage[linesnumbered,ruled,vlined]{algorithm2e}
+\usepackage[margin=2cm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage{listings} 
+\usepackage{graphicx} 
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{verbatim}
+%\usepackage{mdframed}
+
+\newcommand{\currentdata}{14 February 2015}
+\newtheorem{example}{Example}
+
+\begin{document}
+\vspace{-5cm}
+\begin{center}
+Department of Computer Science\\
+Technical University of Cluj-Napoca\\
+\includegraphics[width=10cm]{fig/footer}
+\end{center}
+\vspace{1cm}
+%\maketitle
+\begin{center}
+\begin{Large}
+ \textbf{Artificial Intelligence}\\
+\end{Large}
+\textit{Laboratory activity}\\
+\vspace{3cm}
+Name: Scutaru Lucian\\
+Group: 30235\\
+Email: lucianscutaru00@gmail.com\\
+\vspace{12cm}
+Teaching Assistant: Adrian Groza\\
+Adrian.Groza@cs.utcluj.ro\\
+\vspace{1cm}
+\includegraphics[width=10cm]{fig/footer}
+\end{center}
+
+\tableofcontents
+
+\input{policy}
+
+%\chapter{Laboratory works}
+
+\chapter{A1: Introducere}
+Am realizat 2 modele logice, unul de tip puzzle iar celalalt pentru a reprezenta lumea unui joc cu ajutorul lui mace4.\\
+Puzzle-ul realizat se numeste Knights, Knaves and Normals.\\
+Am ilustrat de asemenea o varianta de parcurgere a jocului Wumpus, prin introducerea in mace4 a regulilor si a indiciilor pe care le primeste agentul.
+
+\chapter{A2: Probleme si solutii}
+\begin{Large}
+ \textbf{       1. Knights, Knaves and Normals}\\
+\end{Large}
+Pe o insula exista anumiti locuitori denumiti Knights, care spun mereu adevarul, Knaves, care mint mereu si Normals, care uneori mint, alte ori spun adevarul. Se presupune ca fiecare locuitor al insulei este ori Knight ori Knave ori Normal. In aceasta problema pe insula se afla 3 locuitori (A, B si C). Unul este Knight, unul Knave si unul Normal. Fiecare face cate un statement. Cine este Knight, cine este Knave si cine Normal, bazandu-ne pe state-menturile facute de ei?\\
+
+A:"I am normal!"\\
+B:"That is true"\\
+C:"I am not normal"\\
+
+\begin{Large}
+ \textbf{Rezolvare}\\
+\end{Large}
+In primul rand decriem faptul ca toata lumea poate fi Knight, Knave sau Normal dar nu poate fi mai mult de o persoana din aceste tipuri.
+Introducem A, B si C ca si constante pentru a reprezenta fiecare dintre persoane. Persoana A nu poate fi in acelasi timp persoana B sau C => A diferit de B si C si B diferit de C.
+
+Din ceea ce spune A rezulta ca acesta poate fi Normal sau Knave.
+In functie de ceea ce este B, el poate sa ne dea starea si pentru A. El poate fi normal, poate fi Knight, caz in care A este normal sau poate fi Knave, caz in care A nu este normal.
+C poate fi Knight sau normal.\\
+
+
+\begin{Large}
+ \textbf{2. Wumpus}\\
+\end{Large}
+Actiunea din Wumpus are loc intr-o serie de pesteri conectate, Goal-ul agentului fiind sa gaseasca aurul fata a da peste Wumpus sau a cadea intr-o groapa.\\
+Reguli: Agentul moare daca intra in pestera lui Wumpus sau cade intr-o groapa. Agentul castiga jocul atunci cand gaseste comoara. Wumpus-ul este unic, la fel ca si agentul, si nu exista gropi in casuta acestora. Pentru a gasi drumul spre comoara agentul poate folosi briza din celulele vecine gropilor si mirosul din celulele vecine lui Wumpus.
+
+\includegraphics{wumpus.png}\\
+\begin{Large}
+ \textbf{Rezolvare}\\
+\end{Large}
+Pentru a gasi solutia si a descrie lumea jocului, vom folosi o matrice de 4x4. Randurile si coloanele sunt numeroatate ca si in imagine. Descriem in limbaj FOL toate regulile mentionate mai sus iar la fiecare pas agentul va primi hint-uri.
+
+\chapter{A3: Implementare}
+
+%\input{mycode}
+\begin{Large}
+ \textbf{Knights, Knaves and Normals.}\\
+\end{Large}\\
+
+x is either a knight, knave or normal
+
+if x is knight he can't be knave or normal
+
+if x in knave he can't be knight or normal
+
+if x is normal he can't be knight or knave
+
+
+Knight, Knave and Normal exists\\
+
+
+A != B & A != C & B != C. person A can't be person B or C
+
+knave(A) | normal(A). A can either be normal or a liar
+
+(knight(B) & normal(A)) | (knave(B) & -normal(A)) | normal(B). B can be normal, be a knight(meaning that A is a normal) or a knave(meaning that A is not normal)
+
+knight(C) | normal(C). (C can either be a knight or a normal)\\
+
+\\
+\begin{Large}
+ \textbf{Wumpus}\\
+\end{Large}\\
+Descriem toate regulile jocului in limbaj FOL. 
+Reprezentam in limbaj celulele vecine(incrementam sau decrementam x) si punem conditia ca incrementarea/decrementarea sa se faca in parametrii domain-size-ului.
+
+Initial agentul primeste hint-ul ca exista un singur pit pe aceeasi linie si coloana.
+
+Acesta incepe din celula (3,0) despre care stie ca este safe si simte miros in celula (2,0) si briza in (3,1)
+
+Alege sa paseasca in (3,1) si mai primeste un hint. (2,3) si (2,1) sunt safe.
+
+Inainteaza in (2,1) si descopera o briza in (2,2) si miros in (1,1).
+
+Merge mai departe in (2,2) stiind ca exista un singur pit pe acea coloana si din cele 2 brize simtite anterior acesta stie ca pit-ul se afla in spatele sau. Aici simte briza in (0,2) si in (1,3), deci pit-ul ar putea fi in (0,3). 
+
+Paseste in (0,2) si primeste inca un hint. (0,1) safe. 
+
+Paseste in (0,1) unde afla ca gold-ul nu poate fi in aceeasi celula cu briza, si ca acesta este pe diagonala principala, insa nu in casuta (0,0), asa ca gaseste gold-ul in (1,1).
+\\
+\\
+\\
+\\
+\\
+\\
+\\
+Pentru a implementa regulile jocului vom folosi:
+
+- stench(x,y) - miros in celula (x,y)
+
+- breeze(x,y) - briza in celula (x,y)
+
+- pit(x,y) - groapa in celula (x,y)
+
+- wumpus(x,y) - wumpus in celula (x,y)
+
+- gold(x,y) - gold in celula (x,y)
+
+- safe(x,y) - celula safe
+\\
+
+Exista wumpus si gold
+
+exists x exists y (wumpus(x,y)).
+
+exists x exists y (gold(x,y)).
+\\
+
+Celula e safe daca nu este wumpus si groapa in ea.
+
+all x all y (safe(x,y) → -wumpus(x,y) -pit(x,y)).
+\\
+
+In celulele vecine wumpus avem miros
+
+all x all y (wumpus(x,y) → stench(increment(x), y)).
+
+all x all y (wumpus(x,y) → stench(decrement(x), y)).
+
+all x all y (wumpus(x,y) → stench(x, increment(y))).
+
+all x all y (wumpus(x,y) → stench(x, decrement(y))).
+\\
+
+Daca o celula are stench, atunci wumpus e intr-o celula vecina
+
+all x all y (stench(x,y) → wumpus(x, y) | wumpus(incrementincrementincrementincrement(x), y) | wumpus(decrementdecrement(x), y) |wumpus(x, incrementincrementincrement(y)) | wumpus(x, decrement(y))).
+
+Daca avem o groapa intr-o celula atunci briza va fi in celulele vecine acesteia.
+
+all x all y (pit(x,y) → breeze(incrementincrement(x), y)).
+
+all x all y (pit(x,y) → breeze(decrementdecrement(x), y)).
+
+all x all y (pit(x,y) → breeze(x, increment(y))).
+
+all x all y (pit(x,y) → breeze(x, decrement(y))).
+\\
+
+Daca simtim briza dintr-o celula atunci o celula vecina acesteia are o groapa.
+
+all x all y (breeze(x,y) → pit(increment(x), y) | pit(decrement(x), y) | pit(x, increment(y)) | pit(x, decrement(y))).
+\\
+
+Wumpus nu exista in aceasi celula cu groapa si gold-ul.
+
+all x all y (wumpus(x,y) → -pit(x,y)).
+
+all x all y (wumpus(x,y) → -gold(x,y)).
+
+\\
+
+Goldul nu este in celula cu groapa sau in celula cu wumpus
+
+all x all y (gold(x,y) → -pit(x,y)).
+
+all x all y (pit(x,y) → -gold(x,y)).
+\\
+
+Daca este miros in celula atunci nu avem pit.
+
+all x all y (stench(x,y) → -pit(x, y) ).
+\\
+
+Wumpus e unic
+
+all x all y (wumpus(x,y) → -(exists z exists w (wumpus(z,w) z != x w != y))).
+
+all x all y (wumpus(x,y) → -(exists z (wumpus(z,y) z != x))).
+
+all x all y (wumpus(x,y) → -(exists z (wumpus(x,z) z != y))).
+\\
+\\
+\\
+
+Gold e unic
+
+all x all y (gold(x,y) → -(exists z exists w (gold(z,w) z != x w != y))).
+
+all x all y (gold(x,y) → -(exists z (gold(z,y) z != x))).
+
+all x all y (gold(x,y) → -(exists z (gold(x,z) z != y))).
+
+\bibliographystyle{plain}
+\bibliography{is}
+1. https://moodle.cs.utcluj.ro/pluginfile.php/134106/mod_resource/content/0/situationcalculus.pdf
+
+2. IA_lab-v1-1.pdf
+
+3.https://www.latex-project.org/
+
+4. https://sites.ualberta.ca/~francisp/Phil428/Phil428.11/NormalsKnK.pdf
+\appendix
+
+\chapter{Your original code}
+Don't be a cheater! Cheating affects your colleagues, scholarships and a lot more.
+This section should contain only code developed by you, without any line re-used from other sources. 
+This section helps me to correctly evaluate your amount of work and results obtained. 
+
+
+\vspace{2cm}
+ 
+\begin{center}
+Intelligent Systems Group\\
+\includegraphics[width=10cm]{fig/footer}
+\end{center}
+
+
+
+\end{document}
